@@ -36,3 +36,4 @@
 {"run":"2026-09-27T11:49:26Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.3,"status":"ok"}
 {"run":"2026-09-27T12:04:34Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":3.0,"status":"ok"}
 {"run":"2026-09-27T12:20:10Z","candles":4,"trials":4,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.8,"status":"ok"}
+{"run":"2026-09-27T12:34:36Z","candles":2,"trials":2,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.1,"status":"ok"}
