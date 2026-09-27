@@ -1,4 +1,4 @@
-/* SIDANG charts — canvas vanilla, DPR-aware, tanpa library eksternal.
+/* QUORUM charts — canvas vanilla, DPR-aware, tanpa library eksternal.
    v2: fill area gradien + active dot (pola chart-card BoardUI), redraw saat resize. */
 
 const C = {
@@ -181,8 +181,8 @@ window.addEventListener("resize", () => {
   clearTimeout(_resizeT);
   _resizeT = setTimeout(() => {
     for (const [cv, opts] of _registry) drawChart(cv, opts);
-    if (window.SIDANGPrice) window.SIDANGPrice.draw();
+    if (window.QUORUMPrice) window.QUORUMPrice.draw();
   }, 150);
 });
 
-window.SIDANGCharts = { drawChart, C };
+window.QUORUMCharts = { drawChart, C };

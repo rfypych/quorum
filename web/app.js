@@ -1,4 +1,4 @@
-/* SIDANG live monitor v2 — paper-only. Data: data/*.jsonl + reports/*.json
+/* QUORUM live monitor v2 — paper-only. Data: data/*.jsonl + reports/*.json
    Nol dependensi eksternal; refresh otomatis tiap 60 detik.
    Chart harga: data/klines.jsonl (telemetry — bukan buku keputusan). */
 
@@ -21,7 +21,7 @@ const fmtWIB = (iso, withDate = true) => {
 };
 const cls = (v) => (v > 0 ? "pos" : v < 0 ? "neg" : "muted");
 const REASON = { take_profit: "TP", stop_loss: "SL", stop_loss_tie: "SL (tie)", timeout: "timeout" };
-const PAL = window.SIDANGCharts.C;
+const PAL = window.QUORUMCharts.C;
 
 let priceChart = null;
 
@@ -86,15 +86,15 @@ async function load() {
 function renderHeader(state, runs) {
   const lastRun = state ? state.last_run_iso : null;
   const ageMin = ago(lastRun);
-  // Cron gratisan GitHub bisa delay/drop tick di jam sibuk (puncak tiap awal jam) —
-  // itu ANTRE, bukan mati; catch-up menjamin data kejar begitu tick berikutnya jalan.
+  // Pemicu utama = cron-job.org (dispatch API — run selalu tercipta); antrean runner masih
+  // bisa mendelay beberapa menit — itu ANTRE, bukan mati; catch-up menjamin data kejar.
   // Jadi: hijau < 40 mnt, kuning ANTRE 40–75 mnt, merah baru > 75 mnt (5 tick berurutan hilang).
   const pill = $("statusPill");
   if (ageMin < 40) {
     pill.textContent = "● BOT HIDUP";
     pill.className = "pill ok";
   } else if (ageMin < 75) {
-    pill.textContent = "● ANTRE (cron gratisan)";
+    pill.textContent = "● ANTRE (tick di antrean)";
     pill.className = "pill warn";
   } else {
     pill.textContent = "● TERLAMBAT / MATI";
@@ -106,7 +106,7 @@ function renderHeader(state, runs) {
   $("lastRun").textContent =
     "run terakhir: " +
     (lastRun ? `${fmtWIB(lastRun)} WIB (${Math.round(ageMin)} mnt lalu)` : "belum ada") +
-    " • jadwal: menit 04/19/34/49 (menit sepi, bebas puncak antrean)";
+    " • pemicu: cron-job.org tiap 15 mnt + cadangan jadwal GitHub + tombol manual";
   const banner = $("banner");
   if (!state) {
     banner.style.display = "block";
@@ -116,7 +116,7 @@ function renderHeader(state, runs) {
     banner.innerHTML =
       "Bot <b>tidak jalan &gt;75 menit</b> — ini bukan sekadar antrean biasa (delay 30–60 mnt itu normal di jam sibuk). " +
       "Begitu bot dipanggil lagi, semua candle terlewat <b>dikejar otomatis</b> (catch-up) — data tidak hilang. " +
-      "Mau paksa jalan sekarang? Buka <a href='https://github.com/rfypych/sidang-live/actions/workflows/live.yml' target='_blank' rel='noopener'>tab Actions → Run workflow</a>. " +
+      "Mau paksa jalan sekarang? Buka <a href='https://github.com/rfypych/quorum/actions/workflows/live.yml' target='_blank' rel='noopener'>tab Actions → Run workflow</a>. " +
       "Kalau tetap mati, cek <a href='setup/SETUP.md'>setup/SETUP.md</a>.";
   } else {
     banner.style.display = "none";
@@ -127,9 +127,9 @@ function renderExplainer(state, trials) {
   // ingat preferensi buka/tutup panel "Ini apa sih?"
   const ex = $("explainer");
   if (ex) {
-    if (localStorage.getItem("sidang-explainer") === "closed") ex.open = false;
+    if (localStorage.getItem("quorum-explainer") === "closed") ex.open = false;
     ex.addEventListener("toggle", () =>
-      localStorage.setItem("sidang-explainer", ex.open ? "open" : "closed"));
+      localStorage.setItem("quorum-explainer", ex.open ? "open" : "closed"));
   }
 
   // angka hidup blok "kenapa 0 trade"
@@ -137,7 +137,7 @@ function renderExplainer(state, trials) {
   const ePtp = $("exPtp"), eBe = $("exBe"), eTr = $("exTrials"), eEn = $("exEnters");
   if (ePtp && last && last.p_tp_used != null) ePtp.textContent = Number(last.p_tp_used).toFixed(1) + "%";
   if (eBe && last && last.be_pct != null) eBe.textContent = Number(last.be_pct).toFixed(1) + "%";
-  if (eTr && state) eTr.textContent = `${state.n_trials ?? 0}\u00d7 sidang`;
+  if (eTr && state) eTr.textContent = `${state.n_trials ?? 0}\u00d7 trial`;
   if (eEn && state) eEn.textContent = `${state.n_enters ?? 0}\u00d7`;
 
   // jam OOS 6 bulan (mulai dari started_iso di buku besar, bukan hardcode)
@@ -189,7 +189,7 @@ function renderCards(state, ledger) {
   const wr = state.n_exits ? Math.round((100 * state.n_wins) / state.n_exits) : null;
   $("cTrades").textContent = state.n_exits != null ? `${state.n_exits}` : "—";
   $("cTrades").className = "value";
-  $("cTradesSub").innerHTML = `${wr == null ? "—" : wr + "%"} WR • ${state.n_trials ?? 0} sidang`;
+  $("cTradesSub").innerHTML = `${wr == null ? "—" : wr + "%"} WR • ${state.n_trials ?? 0} trial`;
 
   const pos = state.position;
   if (pos) {
@@ -216,7 +216,7 @@ function renderToday(trials, ledger) {
   const exits = ledger.filter((e) => e.event === "exit" && isToday(new Date(e.ts * 1000).toISOString()));
   const pnl = exits.reduce((s, e) => s + (e.trade ? e.trade.pnl : 0), 0);
   $("todayLine").innerHTML =
-    `Hari ini (WIB): <b>${t.length}</b> sidang • <b class="pos">${enters}</b> ENTER • ` +
+    `Hari ini (WIB): <b>${t.length}</b> trial • <b class="pos">${enters}</b> ENTER • ` +
     `<b>${exits.length}</b> exit • PnL <b class="${cls(pnl)}">${fmtUSD(pnl)}</b>`;
 }
 
@@ -237,7 +237,7 @@ function renderOHLC(c) {
 function renderPrice(state, klines, ledger) {
   if (!priceChart) {
     priceChart = new CandleChart($("chartPrice"), { onHover: renderOHLC, maxCandles: 600 });
-    window.SIDANGPrice = priceChart; // agar handler resize charts.js ikut menggambar ulang
+    window.QUORUMPrice = priceChart; // agar handler resize charts.js ikut menggambar ulang
   }
 
   const candles = klines
@@ -284,7 +284,7 @@ function renderPrice(state, klines, ledger) {
 
 function renderEquityChart(equity) {
   const pts = equity.filter((e) => e.ts).map((e) => [e.ts, e.equity]);
-  window.SIDANGCharts.drawChart($("chartEquity"), {
+  window.QUORUMCharts.drawChart($("chartEquity"), {
     series: pts.length ? [{ points: pts, color: PAL.lime, width: 1.8, fill: true }] : [],
     hlines: [{ y: 10000, color: PAL.yellow, label: "modal awal $10.000" }],
     yFmt: (v) => "$" + Math.round(v).toLocaleString("id-ID"),
@@ -297,17 +297,17 @@ function renderTrialsChart(trials) {
   const be = tail.length ? tail[tail.length - 1].be_pct : 44.4;
   const pts = tail.filter((x) => x.p_tp_used != null).map((x) => [x.ts * 1, x.p_tp_used]);
   const markers = tail.filter((x) => x.verdict === "enter").map((x) => ({ x: x.ts, y: x.p_tp_used, color: PAL.lime, r: 3.5 }));
-  window.SIDANGCharts.drawChart($("chartTrials"), {
+  window.QUORUMCharts.drawChart($("chartTrials"), {
     series: pts.length ? [{ points: pts, color: PAL.sky, width: 1.3 }] : [],
     hlines: [{ y: be, color: PAL.rose, label: `breakeven ${be.toFixed(1)}%` }],
     markers,
     yFmt: (v) => v.toFixed(0) + "%",
-    empty: "menunggu sidang pertama",
+    empty: "menunggu trial pertama",
   });
   const last = tail[tail.length - 1];
   if (last) {
     $("trialsNote").textContent =
-      `sidang terakhir ${fmtWIB(last.iso)} WIB: P(TP) pesimis ${last.p_tp_used.toFixed(1)}% (mbb ${last.p_tp_mbb.toFixed(1)}% / garch ${last.p_tp_fhs != null ? last.p_tp_fhs.toFixed(1) + "%" : "—"}), EV ${last.ev_used.toFixed(2)}%, divergence ${last.div_pp.toFixed(1)}pp → ${last.verdict.toUpperCase()} • titik lime = ENTER`;
+      `trial terakhir ${fmtWIB(last.iso)} WIB: P(TP) pesimis ${last.p_tp_used.toFixed(1)}% (mbb ${last.p_tp_mbb.toFixed(1)}% / garch ${last.p_tp_fhs != null ? last.p_tp_fhs.toFixed(1) + "%" : "—"}), EV ${last.ev_used.toFixed(2)}%, divergence ${last.div_pp.toFixed(1)}pp → ${last.verdict.toUpperCase()} • titik lime = ENTER`;
   }
 }
 
@@ -370,9 +370,9 @@ function renderBacktest(bts) {
   const tb = $("btCompareBody");
   tb.innerHTML = "";
   if (!reports.length) {
-    tb.innerHTML = "<tr><td colspan='10' class='muted' style='font-family:inherit'>belum ada laporan backtest — trigger <span class='mono'>sidang-backtest</span> di tab Actions repo</td></tr>";
+    tb.innerHTML = "<tr><td colspan='10' class='muted' style='font-family:inherit'>belum ada laporan backtest — trigger <span class='mono'>quorum-backtest</span> di tab Actions repo</td></tr>";
     $("backtestBody").innerHTML = "<span class='muted'>menunggu laporan…</span>";
-    window.SIDANGCharts.drawChart($("chartBacktest"), { series: [], empty: "—" });
+    window.QUORUMCharts.drawChart($("chartBacktest"), { series: [], empty: "—" });
     return;
   }
 
@@ -400,7 +400,7 @@ function renderBacktest(bts) {
     [
       ["profil detail", `${detail.params.profile} • ${detail.period.symbol} ${detail.period.interval}`],
       ["periode", `${detail.period.from.slice(0, 10)} .. ${detail.period.to.slice(0, 10)} (${detail.period.bars.toLocaleString("id-ID")} bar)`],
-      ["sidang", `${d.n_trials.toLocaleString("id-ID")} trial • ${d.n_enters} ENTER (${d.enter_rate_pct}%)`],
+      ["trial", `${d.n_trials.toLocaleString("id-ID")} trial • ${d.n_enters} ENTER (${d.enter_rate_pct}%)`],
       ["hasil", `${fmtUSD(s.starting_cash, 0)} → <b class="${cls(s.total_return_pct)}">${fmtUSD(s.final_equity)}</b> (${fmtPct(s.total_return_pct, 2)})`],
       ["trade", `${s.n_trades} • WR ${s.win_rate_pct ?? "—"}% • PF ${s.profit_factor ?? "—"}`],
       ["risiko", `maxDD ${s.max_drawdown_pct}% • Sharpe(harian) ${s.sharpe_daily_ann} • exposure ${s.exposure_pct}%`],
@@ -408,7 +408,7 @@ function renderBacktest(bts) {
     ].map(([k, v]) => `<div><span class="k">${k}</span><span>${v}</span></div>`).join("") +
     `<div><span class="k">peringatan</span><span class="muted small">${detail.honesty.disclaimer}</span></div>` +
     `<div><span class="k">unduh</span><span><a href="reports/backtest-latest.json">backtest-latest.json</a></span></div>`;
-  window.SIDANGCharts.drawChart($("chartBacktest"), {
+  window.QUORUMCharts.drawChart($("chartBacktest"), {
     series: [{ points: detail.equity_curve, color: PAL.sky, width: 1.5, fill: true }],
     hlines: [{ y: s.starting_cash, color: PAL.yellow, label: "modal awal" }],
     yFmt: (v) => "$" + Math.round(v).toLocaleString("id-ID"),

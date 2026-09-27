@@ -1,4 +1,4 @@
-/* SIDANG candlestick — canvas vanilla, DPR-aware, tanpa library eksternal.
+/* QUORUM candlestick — canvas vanilla, DPR-aware, tanpa library eksternal.
    Pola visual BoardUI: candle naik = lime, turun = rose; grid neutral-800;
    sumbu harga di kanan dengan tag harga terakhir; crosshair saat hover. */
 

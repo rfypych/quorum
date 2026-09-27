@@ -1,4 +1,4 @@
-name: sidang-backtest
+name: quorum-backtest
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
         description: "Kedalaman backtest (bulan)"
         default: "6"
       profile:
-        description: "Profil hakim"
+        description: "Profil"
         default: "conservative"
         type: choice
         options: [conservative, balanced, aggressive]
@@ -22,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sidang-backtest-${{ github.event.inputs.profile || 'conservative' }}
+  group: quorum-backtest-${{ github.event.inputs.profile || 'conservative' }}
   cancel-in-progress: false
 
 jobs:
@@ -55,8 +55,8 @@ jobs:
           }
       - name: commit laporan
         run: |
-          git config user.name "sidang-bot"
-          git config user.email "sidang-bot@users.noreply.github.com"
+          git config user.name "quorum-bot"
+          git config user.email "quorum-bot@users.noreply.github.com"
           git add -A
           # -X ours: kalau konflik rebase (mis. backtest-latest.json ditimpa run paralel),
           # versi RUN INI yang menang — laporan fresh tidak boleh mati gara-gara pointer lama.

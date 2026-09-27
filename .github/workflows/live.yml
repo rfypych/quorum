@@ -1,15 +1,17 @@
-name: sidang-live
+name: quorum-live
 
 on:
+  repository_dispatch:
+    types: [tick] # PEMICU UTAMA: cron-job.org → POST /repos/rfypych/quorum/dispatches {"event_type":"tick"} — dispatch API SELALU menciptakan run; cron internal GitHub terukur me-drop ~90% tick saat sibuk (2 hari: ~7 dari 96 tick/hari nyala)
   schedule:
-    - cron: "4,19,34,49 * * * *" # tiap 15 menit di MENIT SEPI — hindari puncak antrean Actions (:00/:15/:30/:45, terutama :00) tempat cron gratisan sering delay/drop; catch-up menoleransi delay/drop jadwal apa pun
-  workflow_dispatch: {}
+    - cron: "4,19,34,49 * * * *" # cadangan otomatis; kapan pun nyala, catch-up menutup lubang. Run ganda di jendela sama aman: concurrency mengantri, run kedua jadi heartbeat idle (0 candle baru)
+  workflow_dispatch: {} # tombol manual di tab Actions
 
 permissions:
   contents: write
 
 concurrency:
-  group: sidang-live
+  group: quorum-live
   cancel-in-progress: false # antre, jangan saling bunuh (record = append-only)
 
 jobs:
@@ -29,8 +31,8 @@ jobs:
         run: python live_catchup.py
       - name: commit record
         run: |
-          git config user.name "sidang-bot"
-          git config user.email "sidang-bot@users.noreply.github.com"
+          git config user.name "quorum-bot"
+          git config user.email "quorum-bot@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "tidak ada perubahan record"

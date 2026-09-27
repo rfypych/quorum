@@ -1,4 +1,4 @@
-name: sidang-backtest
+name: quorum-backtest
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
         description: "Kedalaman backtest (bulan)"
         default: "6"
       profile:
-        description: "Profil hakim"
+        description: "Profil"
         default: "conservative"
         type: choice
         options: [conservative, balanced, aggressive]
@@ -22,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sidang-backtest-${{ github.event.inputs.profile || 'conservative' }}
+  group: quorum-backtest-${{ github.event.inputs.profile || 'conservative' }}
   cancel-in-progress: false
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
           }
       - name: commit laporan
         run: |
-          git config user.name "sidang-bot"
-          git config user.email "sidang-bot@users.noreply.github.com"
+          git config user.name "quorum-bot"
+          git config user.email "quorum-bot@users.noreply.github.com"
           git add -A
           git diff --cached --quiet || (git commit -m "backtest: ${{ github.event.inputs.months || '6' }} bulan, ${{ github.event.inputs.profile || 'conservative' }}" && (git push || (git pull --rebase --autostash && git push)))
