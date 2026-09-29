@@ -13,18 +13,18 @@
   "cash": 10000.0,
   "alloc": 25.0
  },
- "last_open_ms": 1790644200000.0,
+ "last_open_ms": 1790645100000.0,
  "cash": 10000.0,
  "position": null,
- "n_trials": 1502,
+ "n_trials": 1505,
  "n_enters": 0,
  "n_exits": 0,
  "n_wins": 0,
  "realized_pnl": 0.0,
  "fees_paid": 0.0,
  "started_iso": "2026-09-23T20:00:00Z",
- "last_run_iso": "2026-09-29T01:19:30Z",
+ "last_run_iso": "2026-09-29T01:34:34Z",
  "last_verdict": "stand_down",
- "last_verdict_iso": "2026-09-29T01:10:00Z",
+ "last_verdict_iso": "2026-09-29T01:25:00Z",
  "last_equity": 10000.0
 }
