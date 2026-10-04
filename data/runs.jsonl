@@ -702,3 +702,4 @@
 {"run":"2026-10-04T02:41:35Z","candles":2,"trials":2,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":3.4,"status":"ok"}
 {"run":"2026-10-04T02:49:29Z","candles":1,"trials":1,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.6,"status":"ok"}
 {"run":"2026-10-04T03:04:34Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":3.0,"status":"ok"}
+{"run":"2026-10-04T03:19:30Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":3.4,"status":"ok"}
