@@ -876,3 +876,4 @@
 {"run":"2026-10-05T21:49:32Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.3,"status":"ok"}
 {"run":"2026-10-05T21:54:50Z","candles":1,"trials":1,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.8,"status":"ok"}
 {"run":"2026-10-05T22:04:41Z","candles":2,"trials":2,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.9,"status":"ok"}
+{"run":"2026-10-05T22:19:30Z","candles":3,"trials":3,"enters":0,"exits":0,"equity":10000.0,"elapsed_s":2.6,"status":"ok"}
